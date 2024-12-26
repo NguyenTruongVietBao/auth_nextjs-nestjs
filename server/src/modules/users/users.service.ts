@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,6 +22,14 @@ export class UsersService {
     }
     return false;
   };
+
+  findByEmail = async (email: string) => {
+    return await this.userModal.findOne({ email });
+  };
+
+  findOne(id: number) {
+    return `This action returns a #${id} user`;
+  }
 
   async create(createUserDto: CreateUserDto) {
     //extract properties from createUserDto
@@ -68,15 +80,27 @@ export class UsersService {
     return { result, totalPages };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(updateUserDto: UpdateUserDto) {
+    const _id = updateUserDto._id;
+    const existingUser = await this.userModal.findById(_id);
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+    const newUser = await this.userModal.findByIdAndUpdate(_id, {
+      ...updateUserDto,
+    });
+    return newUser;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(_id: string) {
+    try {
+      const existingUser = await this.userModal.findById(_id);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+      return await this.userModal.findByIdAndDelete(_id);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
