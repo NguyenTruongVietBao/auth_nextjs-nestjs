@@ -30,8 +30,8 @@ export class AuthService {
     async validateUser(username: string, password: string): Promise<any> {
         const user = await this.userService.findByEmail(username);
         const isValidPassword = await comparePassword(password, user.password);
-        if (!user || !isValidPassword) {
-            throw new UnauthorizedException('Invalid credentials');
+        if (!isValidPassword || !user) {
+            return null;
         }
         return user;
     }

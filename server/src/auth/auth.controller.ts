@@ -8,11 +8,13 @@ import {AuthService} from './auth.service';
 import {LocalAuthGuard} from "@/auth/passport/local.auth.guard";
 import {PublicRoute} from "@/auth/passport/jwt-auth.guard";
 import {CreateAuthDto} from "@/auth/dto/create-auth.dto";
+import {MailerService} from "@nestjs-modules/mailer";
 
 @Controller('auth') // ./auth
 export class AuthController {
-    constructor(private authService: AuthService) {
-
+    constructor(private readonly authService: AuthService,
+                private readonly mailerService: MailerService,
+    ) {
     }
 
     // @Post('login')
