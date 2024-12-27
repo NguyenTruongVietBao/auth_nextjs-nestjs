@@ -1,30 +1,52 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { UsersService } from '@/modules/users/users.service';
-import { comparePassword } from '@/helpers/utils';
-import { JwtService } from '@nestjs/jwt';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {UsersService} from '@/modules/users/users.service';
+import {comparePassword} from '@/helpers/utils';
+import {JwtService} from '@nestjs/jwt';
+import {CreateAuthDto} from "@/auth/dto/create-auth.dto";
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private userService: UsersService,
-    private jwtService: JwtService,
-  ) {}
-
-  async login(username: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(username);
-    const isValidPassword = await comparePassword(password, user.password);
-    if (!isValidPassword) {
-      throw new UnauthorizedException('Invalid credentials');
+    constructor(
+        private userService: UsersService,
+        private jwtService: JwtService,
+    ) {
     }
-    const payload = { username: user.email, sub: user._id };
-    return {
-      user,
-      access_token: await this.jwtService.signAsync(payload),
-    };
-  }
-  // async register(createAuthDto: CreateAuthDto) {
-  //   // return this.userService.create(createAuthDto);
-  // }
+
+    // async login(username: string, password: string): Promise<any> {
+    //     const user = await this.userService.findByEmail(username);
+    //     //validate
+    //     const isValidPassword = await comparePassword(password, user.password);
+    //     if (!user || !isValidPassword) {
+    //         throw new UnauthorizedException('Invalid credentials');
+    //     }
+    //     const payload = {username: user.email, sub: user._id};
+    //     const token = await this.jwtService.signAsync(payload)
+    //     return {
+    //         user,
+    //         access_token: token,
+    //     };
+    // }
+
+    async validateUser(username: string, password: string): Promise<any> {
+        const user = await this.userService.findByEmail(username);
+        const isValidPassword = await comparePassword(password, user.password);
+        if (!user || !isValidPassword) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+        return user;
+    }
+
+    async login(user: any) {
+        const payload = {username: user.email, sub: user._id};
+        const token = await this.jwtService.signAsync(payload)
+        return {
+            access_token: token,
+        };
+    }
+
+    async register(registerDto: CreateAuthDto) {
+        return await this.userService.register(registerDto);
+    }
+
+
 }
