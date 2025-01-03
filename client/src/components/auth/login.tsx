@@ -1,16 +1,25 @@
 'use client'
-import { Button, Col, Divider, Form, Input, Row } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import {Button, Col, Divider, Form, Input, notification, Row} from 'antd';
+import {ArrowLeftOutlined} from '@ant-design/icons';
 import Link from 'next/link';
+import {authenticate} from "@/utils/actions";
+import {useRouter} from "next/navigation";
 
 const Login = () => {
+    const router = useRouter();
 
     const onFinish = async (values: any) => {
-
+        const {username, password} = values;
+        const res = await authenticate(username, password);
+        if (res?.error) {
+            notification.error({message: "Error login", description: res?.error})
+        } else {
+            router.push('/dashboard')
+        }
     };
 
     return (
-        <Row justify={"center"} style={{ marginTop: "30px" }}>
+        <Row justify={"center"} style={{marginTop: "30px"}}>
             <Col xs={24} md={16} lg={8}>
                 <fieldset style={{
                     padding: "15px",
@@ -27,15 +36,15 @@ const Login = () => {
                     >
                         <Form.Item
                             label="Email"
-                            name="email"
+                            name="username"
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your email!',
+                                    message: 'Please input your username!',
                                 },
                             ]}
                         >
-                            <Input />
+                            <Input/>
                         </Form.Item>
 
                         <Form.Item
@@ -48,9 +57,8 @@ const Login = () => {
                                 },
                             ]}
                         >
-                            <Input.Password />
+                            <Input.Password/>
                         </Form.Item>
-
 
 
                         <Form.Item
@@ -60,9 +68,9 @@ const Login = () => {
                             </Button>
                         </Form.Item>
                     </Form>
-                    <Link href={"/"}><ArrowLeftOutlined /> Quay lại trang chủ</Link>
-                    <Divider />
-                    <div style={{ textAlign: "center" }}>
+                    <Link href={"/"}><ArrowLeftOutlined/> Quay lại trang chủ</Link>
+                    <Divider/>
+                    <div style={{textAlign: "center"}}>
                         Chưa có tài khoản? <Link href={"/auth/register"}>Đăng ký tại đây</Link>
                     </div>
                 </fieldset>

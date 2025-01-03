@@ -1,15 +1,17 @@
 'use client'
-import { AdminContext } from '@/library/admin.context';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Layout } from 'antd';
-import { useContext } from 'react';
-import { DownOutlined, SmileOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Dropdown, Space } from 'antd';
+import {AdminContext} from '@/library/admin.context';
+import {MenuFoldOutlined, MenuUnfoldOutlined} from '@ant-design/icons';
+import {Button, Layout} from 'antd';
+import {useContext} from 'react';
+import {DownOutlined, SmileOutlined} from '@ant-design/icons';
+import type {MenuProps} from 'antd';
+import {Dropdown, Space} from 'antd';
+import {signOut, useSession} from "next-auth/react";
 
-const AdminHeader = () => {
-    const { Header } = Layout;
-    const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
+const AdminHeader = ({session}: any) => {
+    const {Header} = Layout;
+    const {collapseMenu, setCollapseMenu} = useContext(AdminContext)!;
+    console.log('data', session)
 
     const items: MenuProps['items'] = [
         {
@@ -22,27 +24,13 @@ const AdminHeader = () => {
         },
         {
             key: '2',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                    2nd menu item (disabled)
-                </a>
-            ),
-            icon: <SmileOutlined />,
-            disabled: true,
-        },
-        {
-            key: '3',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-                    3rd menu item (disabled)
-                </a>
-            ),
-            disabled: true,
-        },
-        {
-            key: '4',
             danger: true,
-            label: 'a danger item',
+            label: (
+                <a onClick={() => signOut()}>
+                    Logout
+                </a>
+            ),
+
         },
     ];
 
@@ -55,11 +43,11 @@ const AdminHeader = () => {
                     background: "#f5f5f5",
                     justifyContent: "space-between",
                     alignItems: "center"
-                }} >
+                }}>
 
                 <Button
                     type="text"
-                    icon={collapseMenu ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                    icon={collapseMenu ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
                     onClick={() => setCollapseMenu(!collapseMenu)}
                     style={{
                         fontSize: '16px',
@@ -67,13 +55,13 @@ const AdminHeader = () => {
                         height: 64,
                     }}
                 />
-                <Dropdown menu={{ items }} >
+                <Dropdown menu={{items}}>
                     <a onClick={(e) => e.preventDefault()}
-                        style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
+                       style={{color: "unset", lineHeight: "0 !important", marginRight: 20}}
                     >
                         <Space>
-                            Welcome Admin
-                            <DownOutlined />
+                            Welcome {session?.user?.name ?? ""}
+                            <DownOutlined/>
                         </Space>
                     </a>
                 </Dropdown>

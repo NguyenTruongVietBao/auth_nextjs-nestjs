@@ -14,6 +14,7 @@ import {CreateAuthDto} from "@/auth/dto/create-auth.dto";
 import {v4 as uuidv4} from 'uuid';
 import dayjs from "dayjs";
 import {MailerService} from "@nestjs-modules/mailer";
+import {VerifyAuthDto} from "@/auth/dto/verify-auth.dto";
 
 @Injectable()
 export class UsersService {
@@ -137,7 +138,7 @@ export class UsersService {
             password: passwordHashed,
             isActive: false,
             codeId: codeIdActive,
-            codeExpired: dayjs().add(1, 'day')
+            codeExpired: dayjs().add(5, 'minutes')
         });
 
         //send email
@@ -153,6 +154,31 @@ export class UsersService {
         await this.mailerService.sendMail(mailOptions);
 
         //save user
-        return user.save();
+        await user.save();
+        return {
+            _id: user._id
+        }
+
     }
+
+    // handle active
+    async handleActive(data: VerifyAuthDto) {
+        const user = await this.userModal.findOne({
+            _id: data._id,
+            codeId: data.code
+        });
+        if (!user) {
+            throw new BadRequestException('Code is invalid or expired');
+        }
+        // check code is expired
+        if (dayjs().isAfter(user.codeExpired)) {
+            throw new BadRequestException('Code is expired');
+        }
+
+        await this.userModal.updateOne({_id: data._id}, {
+            isActive: true,
+        })
+        return {message: 'Active success'};
+    }
+
 }

@@ -9,6 +9,8 @@ import {LocalAuthGuard} from "@/auth/passport/local.auth.guard";
 import {PublicRoute} from "@/auth/passport/jwt-auth.guard";
 import {CreateAuthDto} from "@/auth/dto/create-auth.dto";
 import {MailerService} from "@nestjs-modules/mailer";
+import {ResponseMessage} from "@/core/transform.interceptor";
+import {VerifyAuthDto} from "@/auth/dto/verify-auth.dto";
 
 @Controller('auth') // ./auth
 export class AuthController {
@@ -28,6 +30,7 @@ export class AuthController {
     @Post('login')      // ./auth/login
     @PublicRoute()
     @UseGuards(LocalAuthGuard)
+    @ResponseMessage('Fetch login')
     login(@Request() req: any) {
         return this.authService.login(req.user);
     }
@@ -41,6 +44,12 @@ export class AuthController {
     @Get('profile')     // ./auth/profile
     getProfile(@Request() req: any) {
         return req.user;
+    }
+
+    @Post('check-code')   // ./auth/check-code
+    @PublicRoute()
+    checkCode(@Body() data: VerifyAuthDto) {
+        return this.authService.checkCode(data);
     }
 }
 
