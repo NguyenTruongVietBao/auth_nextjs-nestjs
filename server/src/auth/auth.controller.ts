@@ -51,5 +51,13 @@ export class AuthController {
     checkCode(@Body() data: VerifyAuthDto) {
         return this.authService.checkCode(data);
     }
+
+    @Post('retry-active')   // ./auth/retry-active
+    @PublicRoute()
+    retryActive(@Body("email") email: string) {
+        return this.authService.retryActive(email);
+    }
+
+
 }
 

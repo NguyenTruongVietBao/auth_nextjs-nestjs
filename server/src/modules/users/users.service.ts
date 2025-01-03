@@ -181,4 +181,38 @@ export class UsersService {
         return {message: 'Active success'};
     }
 
+    async retryActive(email: string) {
+        //check email
+        const user = await this.userModal.findOne({email});
+
+        if (!user) {
+            throw new BadRequestException("Tài khoản không tồn tại")
+        }
+        if (user.isActive) {
+            throw new BadRequestException("Tài khoản đã được kích hoạt")
+        }
+
+        //send Email
+        const codeId = uuidv4();
+
+        //update user
+        await user.updateOne({
+            codeId: codeId,
+            codeExpired: dayjs().add(5, 'minutes')
+        })
+
+        //send email
+        await this.mailerService.sendMail({
+            to: user.email,
+            subject: 'ACTIVE YOUR ACCOUNT ✔',
+            template: 'register',
+            context: {
+                name: user?.name ?? user.email,
+                activationCode: codeId
+            },
+        })
+        return {_id: user._id}
+    }
+
+
 }
